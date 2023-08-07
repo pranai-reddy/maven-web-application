@@ -4,6 +4,10 @@ node{
     echo "Node Name is : ${env.NODE_NAME}" // To print the Node Name
     
     //lly we can print all Env Variables based on requirement
+
+    //Discard old builds and Poll SCM
+
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
     
     //Get the code from Git and the Git Syntax can also be taken from Pipeline Syntax
     
