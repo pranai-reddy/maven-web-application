@@ -36,7 +36,11 @@ node{
 
     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
     
-    //Get the code from Git and the Git Syntax can also be taken from Pipeline Syntax
+    try {
+
+      sendSlackNotifications('STARTED')      
+
+      //Get the code from Git and the Git Syntax can also be taken from Pipeline Syntax
     
     stage('CheckoutCode'){
         git 'https://github.com/pranai-reddy/maven-web-application.git'
@@ -80,4 +84,15 @@ node{
 
         }
     }
-}
+
+    }// Try block closure
+
+  catch(e) {
+ // If there was an exception thrown, the build failed
+     currentBuild.result = "FAILED"
+  }// Catch block closure
+  finally {
+    // Success or failure, always send notifications
+    sendSlackNotifications(currentBuild.result)
+  } //Finally block closure
+}// Node block closure
