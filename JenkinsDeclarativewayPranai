@@ -1,0 +1,111 @@
+def sendSlackNotifications(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESS'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESS') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary)
+}
+
+
+
+
+pipeline{
+    
+    agent any
+    
+    tools{
+        maven 'maven 3.8.4'
+    }
+    
+    options {
+        timestamps() // To get the timestamps in the Console Output.
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5') // Discard old builds
+        
+    }
+  
+    
+    
+    
+    stages{
+    
+    
+    
+    stage('CheckOutCode'){
+       
+        
+        steps{
+            
+             sendSlackNotifications('STARTED')
+            
+            git 'https://github.com/pranai-reddy/maven-web-application.git'
+        }
+    }
+    
+    stage('Build'){
+        steps{
+            sh "mvn clean package"
+        }
+    }
+    
+    stage('ExecuteSonarQubeReport'){
+        steps{
+            sh "mvn sonar:sonar"
+        }
+    }
+    
+    stage('UploadArtifactIntoNexusServer'){
+        steps{
+            sh "mvn deploy"
+        }
+        
+    }
+    
+    stage('DeployApplicationIntoTomcatServer'){
+        steps{
+            sshagent(['8688a0c0-4127-48b4-b5ed-4e25c2946a8a']) {
+            
+            //Copy the war file from Jenkins Server to RedhatLinux server where Tomcat is reunning.
+            // -o StrictHostKeyChecking=no is for if we are copying for the 1st time, it will ask for do you want to copy yes/no. This is used to avoid this.
+            
+            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.42.83:/opt/apache-tomcat-9.0.75/webapps"
+            
+            
+
+        }
+        }
+    }
+    
+    
+} // Stages Closing
+
+//Calling the function
+post {
+  
+  success {
+    sendSlackNotifications(currentBuild.result)
+  }
+  failure {
+    sendSlackNotifications(currentBuild.result)
+  }
+}//Post closing tag
+
+
+} // pipeline closing
