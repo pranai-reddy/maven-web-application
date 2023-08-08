@@ -78,7 +78,7 @@ node{
             //Copy the war file from Jenkins Server to RedhatLinux server where Tomcat is reunning.
             // -o StrictHostKeyChecking=no is for if we are copying for the 1st time, it will ask for do you want to copy yes/no. This is used to avoid this.
             
-            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.110.207.157:/opt/apache-tomcat-9.0.75/webapps"
+            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.42.83:/opt/apache-tomcat-9.0.75/webapps"
             
             
 
