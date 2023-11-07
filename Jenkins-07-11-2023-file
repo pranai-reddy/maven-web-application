@@ -1,0 +1,33 @@
+node {
+    
+    echo " Job Name is : ${env.JOB_NAME}"
+    echo " Node Name is : ${env.NODE_NAME}"
+    
+    stage('checkOutCode'){
+        git 'https://github.com/pranai-reddy/maven-web-application.git'
+    }
+    
+    def mavenHome = tool  name : "maven 3.8.4"
+    
+    stage('Build'){
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    
+    stage('ExecuteSonarQubeReport'){
+        sh "${mavenHome}/bin/mvn sonar:sonar"
+    }
+    
+    stage('UploadArtifactintoNexus'){
+        sh "${mavenHome}/bin/mvn deploy"
+    }
+    
+    stage('DeployApplicationintoTomcatServer'){
+        
+        sshagent(['8688a0c0-4127-48b4-b5ed-4e25c2946a8a']) {
+            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@52.66.134.108:/opt/apache-tomcat-9.0.75/webapps"
+            
+            
+        }
+        
+    }
+}
