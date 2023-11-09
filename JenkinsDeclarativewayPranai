@@ -33,13 +33,13 @@ pipeline{
     
     tools{
         maven 'maven 3.8.4'
-    }
+    }//Closing Tools
     
     options {
         timestamps() // To get the timestamps in the Console Output.
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5') // Discard old builds
         
-    }
+    }//Closing options
   
     
     
@@ -56,27 +56,27 @@ pipeline{
              sendSlackNotifications('STARTED')
             
             git 'https://github.com/pranai-reddy/maven-web-application.git'
-        }
-    }
+        }//Closing Steps
+    }//Closing Checkoutcode stage
     
     stage('Build'){
         steps{
             sh "mvn clean package"
-        }
-    }
+        }//Closing Steps
+    }//Closing Build stage
     
     stage('ExecuteSonarQubeReport'){
         steps{
             sh "mvn sonar:sonar"
-        }
-    }
+        }//Closing Steps
+    }//Closing ExecuteSonarQubeReport stage
     
     stage('UploadArtifactIntoNexusServer'){
         steps{
             sh "mvn deploy"
-        }
+        }//Closing Steps
         
-    }
+    }//Closing UploadArtifactIntoNexusServer stage
     
     stage('DeployApplicationIntoTomcatServer'){
         steps{
@@ -89,9 +89,9 @@ pipeline{
             
             
 
-        }
-        }
-    }
+        }//Closing ssh agent
+        }//Closing Steps
+    }//Closing DeployApplicationIntoTomcatServer stage
     
     
 } // Stages Closing
