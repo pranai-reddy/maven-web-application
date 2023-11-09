@@ -30,6 +30,10 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
     
     echo " Job Name is : ${env.JOB_NAME}"
     echo " Node Name is : ${env.NODE_NAME}"
+
+try {
+
+sendSlackNotification('STARTED') //Call the function
     
     stage('checkOutCode'){
         git 'https://github.com/pranai-reddy/maven-web-application.git'
@@ -58,4 +62,13 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
         }
         
     }
+}
+catch(e) {
+//If there is an exception then throw us failed status
+currentBuild.result="FAILED" // Here currentBuil is the Environment Variable
+}
+finally {
+//Sends us the notification either Success or Failure
+sendSlackNotification(currentBuild.result)
+}
 }
