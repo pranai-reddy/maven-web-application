@@ -96,7 +96,7 @@ pipeline{
     
 } // Stages Closing
 
-//Calling the function
+//Calling the function and the below piece of syntax can be taken from pipleline sysntax of Declarative Directive Generator
 post {
   
   success {
