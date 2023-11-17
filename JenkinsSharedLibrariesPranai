@@ -1,0 +1,27 @@
+@Library('sharedlibs') _
+// This above was name we have given for our Shared Lib in Jenkins Configuration
+
+node{
+    try {
+        sendSlackNotifications('STARTED') //Call the function. while calling the function make sure to use the same name used in https://github.com/pranai-reddy/slacknotification-sharedlibs/tree/master/vars(sendSlackNotofictions)
+        stage('checkOutCode'){
+            git 'https://github.com/pranai-reddy/maven-web-application.git'
+            
+        }
+        def mavenHome=tool name: 'maven 3.8.4'
+        stage('Build'){
+            sh "${mavenHome}/bin/mvn clean package"
+            
+        }
+        
+    }
+    catch(e) {
+        //If there is an exception then throw us failed status
+        currentBuild.result="FAILED" // Here currentBuil is the Environment Variable
+        }
+        finally {
+            //Sends us the notification either Success or Failure
+            sendSlackNotifications(currentBuild.result)////Call the function. while calling the function make sure to use the same name used in https://github.com/pranai-reddy/slacknotification-sharedlibs/tree/master/vars(sendSlackNotofictions)
+            
+        }
+}
